@@ -1,0 +1,129 @@
+// Utility functions for QR code generation and validation
+
+import { QR_PREFIX } from '../constants';
+import { QRCode, DurationOption } from '../types';
+import { DURATION_OPTIONS } from '../constants';
+
+// Generate a unique token for QR code
+export const generateQRToken = (
+    teacherId: string,
+    teacherName: string,
+    subject: string,
+    className: string,
+    expiresAt: number
+): string => {
+    const timestamp = Date.now();
+    const randomSalt = Math.random().toString(36).substring(2, 10);
+    const data = `${QR_PREFIX}_${teacherId}_${teacherName}_${subject}_${className}_${timestamp}_${expiresAt}_${randomSalt}`;
+
+    // Simple Base64 encoding
+    return btoa(data);
+};
+
+// Parse QR code token to extract information
+export const parseQRToken = (token: string): {
+    prefix: string;
+    teacherId: string;
+    teacherName: string;
+    subject: string;
+    className: string;
+    timestamp: number;
+    expiresAt: number;
+    salt: string;
+} | null => {
+    try {
+        const decoded = atob(token);
+        const parts = decoded.split('_');
+
+        if (parts.length < 8 || parts[0] !== QR_PREFIX) {
+            return null;
+        }
+
+        return {
+            prefix: parts[0],
+            teacherId: parts[1],
+            teacherName: parts[2],
+            subject: parts[3],
+            className: parts[4],
+            timestamp: parseInt(parts[5], 10),
+            expiresAt: parseInt(parts[6], 10),
+            salt: parts[7],
+        };
+    } catch (error) {
+        return null;
+    }
+};
+
+// Calculate expiry time based on duration option
+export const calculateExpiryTime = (duration: DurationOption, customMinutes?: number): number => {
+    const now = Date.now();
+    const option = DURATION_OPTIONS.find(opt => opt.value === duration);
+
+    if (!option) return now + 60 * 60 * 1000; // Default 1 hour
+
+    const minutes = duration === 'custom' && customMinutes ? customMinutes : option.minutes;
+    return now + minutes * 60 * 1000;
+};
+
+// Check if QR code is expired
+export const isQRExpired = (expiresAt: number): boolean => {
+    return Date.now() > expiresAt;
+};
+
+// Get remaining time in milliseconds
+export const getRemainingTime = (expiresAt: number): number => {
+    const remaining = expiresAt - Date.now();
+    return remaining > 0 ? remaining : 0;
+};
+
+// Format remaining time for display
+export const formatRemainingTime = (expiresAt: number): string => {
+    const remaining = getRemainingTime(expiresAt);
+
+    if (remaining === 0) return 'Expired';
+
+    const hours = Math.floor(remaining / (1000 * 60 * 60));
+    const minutes = Math.floor((remaining % (1000 * 60 * 60)) / (1000 * 60));
+    const seconds = Math.floor((remaining % (1000 * 60)) / 1000);
+
+    if (hours > 24) {
+        const days = Math.floor(hours / 24);
+        return `${days} day${days > 1 ? 's' : ''}`;
+    }
+
+    if (hours > 0) {
+        return `${hours}h ${minutes}m`;
+    }
+
+    if (minutes > 0) {
+        return `${minutes}m ${seconds}s`;
+    }
+
+    return `${seconds}s`;
+};
+
+// Calculate distance between two coordinates (in meters)
+export const calculateDistance = (
+    lat1: number,
+    lng1: number,
+    lat2: number,
+    lng2: number
+): number => {
+    const R = 6371e3; // Earth's radius in meters
+    const φ1 = (lat1 * Math.PI) / 180;
+    const φ2 = (lat2 * Math.PI) / 180;
+    const Δφ = ((lat2 - lat1) * Math.PI) / 180;
+    const Δλ = ((lng2 - lng1) * Math.PI) / 180;
+
+    const a =
+        Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
+        Math.cos(φ1) * Math.cos(φ2) * Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+    return R * c;
+};
+
+// Generate unique ID
+export const generateUniqueId = (): string => {
+    return Date.now().toString(36) + Math.random().toString(36).substring(2);
+};
