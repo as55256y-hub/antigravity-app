@@ -13,6 +13,7 @@ import { COLORS } from '../constants';
 import LoginScreen from '../screens/auth/LoginScreen';
 import RegisterScreen from '../screens/auth/RegisterScreen';
 import ProfileScreen from '../screens/auth/ProfileScreen';
+import AboutScreen from '../screens/auth/AboutScreen';
 
 // Teacher Screens
 import TeacherDashboardScreen from '../screens/teacher/TeacherDashboardScreen';
@@ -34,6 +35,7 @@ export type RootStackParamList = {
 export type AuthStackParamList = {
     Login: undefined;
     Register: undefined;
+    About: undefined;
 };
 
 export type TeacherTabParamList = {
@@ -66,6 +68,7 @@ const AuthNavigator = () => {
         >
             <AuthStack.Screen name="Login" component={LoginScreen} />
             <AuthStack.Screen name="Register" component={RegisterScreen} />
+            <AuthStack.Screen name="About" component={AboutScreen} />
         </AuthStack.Navigator>
     );
 };

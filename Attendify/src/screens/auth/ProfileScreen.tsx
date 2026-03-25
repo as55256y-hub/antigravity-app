@@ -207,7 +207,7 @@ const ProfileScreen = ({ navigation, route }: any) => {
                     <Ionicons name="chevron-forward" size={20} color={COLORS.textSecondary} />
                 </TouchableOpacity>
 
-                <TouchableOpacity style={styles.menuItem}>
+                <TouchableOpacity style={styles.menuItem} onPress={() => navigation.navigate('About')}>
                     <Ionicons name="information-circle-outline" size={24} color={COLORS.text} />
                     <Text style={styles.menuText}>About</Text>
                     <Ionicons name="chevron-forward" size={20} color={COLORS.textSecondary} />

@@ -1,4 +1,4 @@
-// Student Dashboard Screen
+// Student Dashboard Screen - Sophisticated Teal & Gold Luxury Theme
 
 import React, { useState, useMemo } from 'react';
 import {
@@ -12,12 +12,28 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../../context/AuthContext';
 import { useAttendance } from '../../context/AttendanceContext';
+import { useTheme } from '../../context/ThemeContext';
 import { COLORS, SPACING, FONT_SIZES, BORDER_RADIUS } from '../../constants';
 
 const StudentDashboardScreen = ({ navigation }: any) => {
     const { user, logout } = useAuth();
     const { attendances, getStudentAttendance, qrCodes } = useAttendance();
+    const { isDark } = useTheme();
     const [refreshing, setRefreshing] = useState(false);
+
+    // Sophisticated Teal & Gold Luxury Color Palette
+    const colors = {
+        background: '#1A1A1A',
+        surface: '#2C2C2C',
+        surfaceLight: '#3A3A3A',
+        primary: '#4F7C82',
+        accent: '#D4AF37',
+        copper: '#A05E3C',
+        forestGreen: '#1F4529',
+        text: '#FFF8DC',
+        textSecondary: '#C0C0C0',
+        textMuted: '#8A8A8A',
+    };
 
     const myAttendance = useMemo(() => {
         return getStudentAttendance(user?.id || '');
@@ -51,133 +67,250 @@ const StudentDashboardScreen = ({ navigation }: any) => {
     }, [myAttendance]);
 
     return (
-        <ScrollView
-            style={styles.container}
-            contentContainerStyle={styles.contentContainer}
-            refreshControl={
-                <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-            }
-        >
-            {/* Header */}
-            <View style={styles.header}>
-                <View>
-                    <Text style={styles.greeting}>Hello,</Text>
-                    <Text style={styles.studentName}>{user?.name}</Text>
-                    <Text style={styles.rollNumber}>Roll: {user?.rollNumber || 'N/A'}</Text>
+        <View style={[styles.container, { backgroundColor: colors.background }]}>
+            <ScrollView
+                contentContainerStyle={styles.contentContainer}
+                refreshControl={
+                    <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+                }
+            >
+                {/* Header */}
+                <View style={styles.header}>
+                    <View style={styles.headerLeft}>
+                        <Text style={styles.headerTitle}>Dashboard</Text>
+                        <Text style={[styles.greeting, { color: colors.textSecondary }]}>Welcome back,</Text>
+                        <Text style={[styles.studentName, { color: colors.text }]}>{user?.name}</Text>
+                        <Text style={[styles.rollNumber, { color: colors.textMuted }]}>
+                            Roll: {user?.rollNumber || 'Not assigned'}
+                        </Text>
+                    </View>
+                    <View style={styles.headerRight}>
+                        <View style={[styles.profileAvatar, { backgroundColor: colors.primary }]}>
+                            <Text style={[styles.avatarText, { color: colors.copper }]}>
+                                {user?.name?.charAt(0)?.toUpperCase() || 'A'}
+                            </Text>
+                        </View>
+                        <TouchableOpacity
+                            style={[styles.logoutButton, { borderColor: colors.accent }]}
+                            onPress={logout}
+                        >
+                            <Ionicons name="log-out-outline" size={20} color={colors.accent} />
+                        </TouchableOpacity>
+                    </View>
                 </View>
-                <TouchableOpacity style={styles.logoutButton} onPress={logout}>
-                    <Ionicons name="log-out-outline" size={24} color={COLORS.white} />
+
+                {/* Banner Section - Teal to Forest Green Gradient */}
+                <View style={styles.bannerContainer}>
+                    <View style={styles.banner}>
+                        <View style={styles.bannerContent}>
+                            <View style={[styles.qrIconCircle, { borderColor: colors.accent }]}>
+                                <Ionicons name="scan" size={32} color={colors.accent} />
+                            </View>
+                            <View style={styles.bannerText}>
+                                <Text style={styles.bannerTitle}>Mark Attendance</Text>
+                                <Text style={styles.bannerSubtitle}>Scan QR code to mark your presence</Text>
+                            </View>
+                        </View>
+                    </View>
+                </View>
+
+                {/* Stats Cards */}
+                <View style={styles.statsContainer}>
+                    <View style={[styles.statCard, { backgroundColor: colors.surface }]}>
+                        <View style={[styles.statIcon, { backgroundColor: colors.primary + '30' }]}>
+                            <Ionicons name="checkmark-circle" size={24} color={colors.accent} />
+                        </View>
+                        <Text style={[styles.statNumber, { color: colors.text }]}>{stats.total}</Text>
+                        <Text style={[styles.statLabel, { color: colors.textSecondary }]}>Total Present</Text>
+                    </View>
+                    <View style={[styles.statCard, { backgroundColor: colors.surface }]}>
+                        <View style={[styles.statIcon, { backgroundColor: colors.copper + '30' }]}>
+                            <Ionicons name="book" size={24} color={colors.copper} />
+                        </View>
+                        <Text style={[styles.statNumber, { color: colors.text }]}>{stats.uniqueSubjects}</Text>
+                        <Text style={[styles.statLabel, { color: colors.textSecondary }]}>Subjects</Text>
+                    </View>
+                </View>
+
+                {/* Quick Actions - Neumorphic Cards */}
+                <View style={styles.quickActions}>
+                    <Text style={[styles.sectionTitle, { color: colors.text }]}>Quick Actions</Text>
+                    <View style={styles.actionsRow}>
+                        <TouchableOpacity
+                            style={[styles.actionCard, { backgroundColor: colors.surface }]}
+                            onPress={() => navigation.navigate('MyAttendance')}
+                        >
+                            <View style={[styles.actionIconContainer, { borderColor: colors.accent }]}>
+                                <Ionicons name="calendar" size={24} color={colors.accent} />
+                            </View>
+                            <Text style={[styles.actionText, { color: colors.text }]}>My Attendance</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                            style={[styles.actionCard, { backgroundColor: colors.surface }]}
+                            onPress={() => navigation.navigate('ScanQR')}
+                        >
+                            <View style={[styles.actionIconContainer, { borderColor: colors.copper }]}>
+                                <Ionicons name="scan" size={24} color={colors.copper} />
+                            </View>
+                            <Text style={[styles.actionText, { color: colors.text }]}>Scan QR</Text>
+                        </TouchableOpacity>
+                    </View>
+                </View>
+
+                {/* Recent Attendance */}
+                {recentAttendance.length > 0 && (
+                    <View style={styles.recentSection}>
+                        <Text style={[styles.sectionTitle, { color: colors.text }]}>Recent Attendance</Text>
+                        {recentAttendance.map((attendance) => {
+                            const qr = qrCodes.find(q => q.id === attendance.qrCodeId);
+                            return (
+                                <View key={attendance.id} style={[styles.attendanceCard, { backgroundColor: colors.surface }]}>
+                                    <View style={styles.attendanceInfo}>
+                                        <Text style={[styles.subjectText, { color: colors.text }]}>{qr?.subject || 'Unknown Subject'}</Text>
+                                        <Text style={[styles.classText, { color: colors.textSecondary }]}>{qr?.className || 'Unknown Class'}</Text>
+                                    </View>
+                                    <View style={styles.timeContainer}>
+                                        <Ionicons name="time-outline" size={14} color={colors.textMuted} />
+                                        <Text style={[styles.timeText, { color: colors.textMuted }]}>
+                                            {new Date(attendance.scannedAt).toLocaleDateString()}
+                                        </Text>
+                                    </View>
+                                </View>
+                            );
+                        })}
+                    </View>
+                )}
+
+                {/* Empty State - Neumorphic */}
+                {recentAttendance.length === 0 && (
+                    <View style={[styles.emptyState, { backgroundColor: colors.surface }]}>
+                        <View style={styles.emptyIconContainer}>
+                            <Ionicons name="qr-code-outline" size={48} color={colors.accent} />
+                        </View>
+                        <Text style={[styles.emptyTitle, { color: colors.text }]}>No Attendance Yet</Text>
+                        <Text style={[styles.emptyText, { color: colors.textSecondary }]}>
+                            Scan a QR code to mark your attendance
+                        </Text>
+                    </View>
+                )}
+            </ScrollView>
+
+            {/* Bottom Navigation */}
+            <View style={styles.bottomNav}>
+                <TouchableOpacity style={styles.navItem}>
+                    <View style={[styles.navIconActive, { backgroundColor: colors.primary + '30' }]}>
+                        <Ionicons name="grid" size={22} color={colors.accent} />
+                    </View>
+                    <Text style={[styles.navTextActive, { color: colors.accent }]}>Dashboard</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.navItem} onPress={() => navigation.navigate('ScanQR')}>
+                    <Ionicons name="scan-outline" size={22} color={colors.textMuted} />
+                    <Text style={[styles.navText, { color: colors.textMuted }]}>Scan</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.navItem} onPress={() => navigation.navigate('Profile')}>
+                    <Ionicons name="person-outline" size={22} color={colors.textMuted} />
+                    <Text style={[styles.navText, { color: colors.textMuted }]}>Profile</Text>
                 </TouchableOpacity>
             </View>
-
-            {/* Stats Cards */}
-            <View style={styles.statsContainer}>
-                <View style={styles.statCard}>
-                    <Ionicons name="checkmark-circle" size={32} color={COLORS.secondary} />
-                    <Text style={styles.statNumber}>{stats.total}</Text>
-                    <Text style={styles.statLabel}>Total Present</Text>
-                </View>
-                <View style={styles.statCard}>
-                    <Ionicons name="book" size={32} color={COLORS.primary} />
-                    <Text style={styles.statNumber}>{stats.uniqueSubjects}</Text>
-                    <Text style={styles.statLabel}>Subjects</Text>
-                </View>
-            </View>
-
-            {/* Scan QR Button */}
-            <TouchableOpacity
-                style={styles.scanButton}
-                onPress={() => navigation.navigate('ScanQR')}
-            >
-                <View style={styles.scanButtonContent}>
-                    <Ionicons name="scan" size={48} color={COLORS.white} />
-                    <Text style={styles.scanButtonText}>Scan QR Code</Text>
-                    <Text style={styles.scanButtonSubtext}>
-                        Mark your attendance
-                    </Text>
-                </View>
-            </TouchableOpacity>
-
-            {/* Quick Actions */}
-            <View style={styles.quickActions}>
-                <Text style={styles.sectionTitle}>Quick Actions</Text>
-                <View style={styles.actionsRow}>
-                    <TouchableOpacity
-                        style={styles.actionCard}
-                        onPress={() => navigation.navigate('MyAttendance')}
-                    >
-                        <Ionicons name="calendar" size={28} color={COLORS.primary} />
-                        <Text style={styles.actionText}>My Attendance</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                        style={styles.actionCard}
-                        onPress={() => navigation.navigate('ScanQR')}
-                    >
-                        <Ionicons name="scan" size={28} color={COLORS.secondary} />
-                        <Text style={styles.actionText}>Scan QR</Text>
-                    </TouchableOpacity>
-                </View>
-            </View>
-
-            {/* Recent Attendance */}
-            {recentAttendance.length > 0 && (
-                <View style={styles.recentSection}>
-                    <Text style={styles.sectionTitle}>Recent Attendance</Text>
-                    {recentAttendance.map((attendance) => {
-                        const qr = qrCodes.find(q => q.id === attendance.qrCodeId);
-                        return (
-                            <View key={attendance.id} style={styles.attendanceCard}>
-                                <View style={styles.attendanceInfo}>
-                                    <Text style={styles.subjectText}>{qr?.subject || 'Unknown Subject'}</Text>
-                                    <Text style={styles.classText}>{qr?.className || 'Unknown Class'}</Text>
-                                </View>
-                                <View style={styles.timeContainer}>
-                                    <Ionicons name="time-outline" size={14} color={COLORS.textSecondary} />
-                                    <Text style={styles.timeText}>
-                                        {new Date(attendance.scannedAt).toLocaleDateString()}
-                                    </Text>
-                                </View>
-                            </View>
-                        );
-                    })}
-                </View>
-            )}
-        </ScrollView>
+        </View>
     );
 };
 
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: COLORS.background,
     },
     contentContainer: {
         padding: SPACING.lg,
+        paddingBottom: 100,
     },
     header: {
         flexDirection: 'row',
         justifyContent: 'space-between',
-        alignItems: 'center',
+        alignItems: 'flex-start',
         marginBottom: SPACING.lg,
+    },
+    headerLeft: {
+        flex: 1,
+    },
+    headerTitle: {
+        fontSize: FONT_SIZES.h4,
+        fontWeight: '600',
+        color: '#FFF8DC',
+        fontFamily: 'serif',
+        marginBottom: SPACING.xs,
     },
     greeting: {
         fontSize: FONT_SIZES.body,
-        color: COLORS.textSecondary,
     },
     studentName: {
         fontSize: FONT_SIZES.h2,
         fontWeight: 'bold',
-        color: COLORS.text,
     },
     rollNumber: {
         fontSize: FONT_SIZES.bodySmall,
-        color: COLORS.textSecondary,
         marginTop: 2,
     },
+    headerRight: {
+        alignItems: 'center',
+        gap: SPACING.sm,
+    },
+    profileAvatar: {
+        width: 48,
+        height: 48,
+        borderRadius: 24,
+        justifyContent: 'center',
+        alignItems: 'center',
+        borderWidth: 2,
+        borderColor: '#A05E3C',
+    },
+    avatarText: {
+        fontSize: FONT_SIZES.h3,
+        fontWeight: 'bold',
+    },
     logoutButton: {
-        padding: SPACING.sm,
-        backgroundColor: COLORS.primary,
-        borderRadius: BORDER_RADIUS.round,
+        width: 36,
+        height: 36,
+        borderRadius: 18,
+        borderWidth: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    bannerContainer: {
+        marginBottom: SPACING.lg,
+    },
+    banner: {
+        backgroundColor: '#4F7C82',
+        borderRadius: BORDER_RADIUS.xl,
+        padding: SPACING.lg,
+        overflow: 'hidden',
+    },
+    bannerContent: {
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+    qrIconCircle: {
+        width: 64,
+        height: 64,
+        borderRadius: 32,
+        borderWidth: 2,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: 'rgba(212, 175, 55, 0.1)',
+    },
+    bannerText: {
+        marginLeft: SPACING.md,
+        flex: 1,
+    },
+    bannerTitle: {
+        fontSize: FONT_SIZES.h3,
+        fontWeight: 'bold',
+        color: '#FFF8DC',
+    },
+    bannerSubtitle: {
+        fontSize: FONT_SIZES.bodySmall,
+        color: '#C0C0C0',
+        marginTop: 2,
     },
     statsContainer: {
         flexDirection: 'row',
@@ -186,51 +319,26 @@ const styles = StyleSheet.create({
     },
     statCard: {
         flex: 1,
-        backgroundColor: COLORS.surface,
         borderRadius: BORDER_RADIUS.lg,
         padding: SPACING.lg,
         alignItems: 'center',
-        shadowColor: COLORS.black,
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 4,
-        elevation: 2,
+        borderWidth: 1,
+        borderColor: 'rgba(212, 175, 55, 0.2)',
+    },
+    statIcon: {
+        width: 44,
+        height: 44,
+        borderRadius: 22,
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginBottom: SPACING.sm,
     },
     statNumber: {
         fontSize: FONT_SIZES.h1,
         fontWeight: 'bold',
-        color: COLORS.text,
-        marginTop: SPACING.sm,
     },
     statLabel: {
         fontSize: FONT_SIZES.caption,
-        color: COLORS.textSecondary,
-        marginTop: SPACING.xs,
-    },
-    scanButton: {
-        backgroundColor: COLORS.secondary,
-        borderRadius: BORDER_RADIUS.xl,
-        padding: SPACING.xl,
-        marginBottom: SPACING.lg,
-        shadowColor: COLORS.secondary,
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.3,
-        shadowRadius: 8,
-        elevation: 6,
-    },
-    scanButtonContent: {
-        alignItems: 'center',
-    },
-    scanButtonText: {
-        fontSize: FONT_SIZES.h3,
-        fontWeight: 'bold',
-        color: COLORS.white,
-        marginTop: SPACING.md,
-    },
-    scanButtonSubtext: {
-        fontSize: FONT_SIZES.bodySmall,
-        color: COLORS.white,
-        opacity: 0.8,
         marginTop: SPACING.xs,
     },
     quickActions: {
@@ -239,7 +347,6 @@ const styles = StyleSheet.create({
     sectionTitle: {
         fontSize: FONT_SIZES.h4,
         fontWeight: '600',
-        color: COLORS.text,
         marginBottom: SPACING.md,
     },
     actionsRow: {
@@ -248,39 +355,37 @@ const styles = StyleSheet.create({
     },
     actionCard: {
         flex: 1,
-        backgroundColor: COLORS.surface,
         borderRadius: BORDER_RADIUS.lg,
         padding: SPACING.lg,
         alignItems: 'center',
-        shadowColor: COLORS.black,
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 4,
-        elevation: 2,
+        borderWidth: 1,
+        borderColor: 'rgba(212, 175, 55, 0.15)',
+    },
+    actionIconContainer: {
+        width: 48,
+        height: 48,
+        borderRadius: 24,
+        borderWidth: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginBottom: SPACING.sm,
     },
     actionText: {
         fontSize: FONT_SIZES.bodySmall,
         fontWeight: '600',
-        color: COLORS.text,
-        marginTop: SPACING.sm,
-        textAlign: 'center',
     },
     recentSection: {
         marginBottom: SPACING.lg,
     },
     attendanceCard: {
-        backgroundColor: COLORS.surface,
         borderRadius: BORDER_RADIUS.md,
         padding: SPACING.md,
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
         marginBottom: SPACING.sm,
-        shadowColor: COLORS.black,
-        shadowOffset: { width: 0, height: 1 },
-        shadowOpacity: 0.05,
-        shadowRadius: 2,
-        elevation: 1,
+        borderWidth: 1,
+        borderColor: 'rgba(212, 175, 55, 0.1)',
     },
     attendanceInfo: {
         flex: 1,
@@ -288,11 +393,9 @@ const styles = StyleSheet.create({
     subjectText: {
         fontSize: FONT_SIZES.body,
         fontWeight: '600',
-        color: COLORS.text,
     },
     classText: {
         fontSize: FONT_SIZES.bodySmall,
-        color: COLORS.textSecondary,
         marginTop: 2,
     },
     timeContainer: {
@@ -302,7 +405,62 @@ const styles = StyleSheet.create({
     },
     timeText: {
         fontSize: FONT_SIZES.caption,
-        color: COLORS.textSecondary,
+    },
+    emptyState: {
+        borderRadius: BORDER_RADIUS.lg,
+        padding: SPACING.xl,
+        alignItems: 'center',
+        borderWidth: 1,
+        borderColor: 'rgba(212, 175, 55, 0.15)',
+    },
+    emptyIconContainer: {
+        width: 80,
+        height: 80,
+        borderRadius: 40,
+        backgroundColor: 'rgba(212, 175, 55, 0.1)',
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginBottom: SPACING.md,
+    },
+    emptyTitle: {
+        fontSize: FONT_SIZES.h3,
+        fontWeight: '600',
+    },
+    emptyText: {
+        fontSize: FONT_SIZES.body,
+        marginTop: SPACING.sm,
+        textAlign: 'center',
+    },
+    bottomNav: {
+        position: 'absolute',
+        bottom: 0,
+        left: 0,
+        right: 0,
+        backgroundColor: '#1A1A1A',
+        flexDirection: 'row',
+        justifyContent: 'space-around',
+        paddingVertical: SPACING.md,
+        paddingBottom: SPACING.xl,
+        borderTopWidth: 1,
+        borderTopColor: 'rgba(212, 175, 55, 0.1)',
+    },
+    navItem: {
+        alignItems: 'center',
+        gap: 4,
+    },
+    navIconActive: {
+        width: 40,
+        height: 40,
+        borderRadius: 20,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    navTextActive: {
+        fontSize: FONT_SIZES.caption,
+        fontWeight: '600',
+    },
+    navText: {
+        fontSize: FONT_SIZES.caption,
     },
 });
 

@@ -145,17 +145,31 @@ export const AttendanceProvider: React.FC<{ children: ReactNode }> = ({ children
         }
 
         try {
-            // Parse the QR token
-            const parsed = parseQRToken(token);
-            if (!parsed) {
-                return { success: false, message: MESSAGES.INVALID_QR };
+            // Trim whitespace from token to handle any scanning issues
+            const cleanToken = token.trim();
+
+            // Find the QR code in storage by matching the token
+            let qrCode = qrCodes.find(qr => qr.token === cleanToken);
+
+            // If not found by token, try matching by ID as fallback
+            if (!qrCode) {
+                qrCode = qrCodes.find(qr => qr.id === cleanToken || qr.id === cleanToken.replace(/\s/g, ''));
             }
 
-            // Find the QR code in storage
-            const qrCode = qrCodes.find(qr => qr.token === token);
+            // If still not found, try parsing the token
+            if (!qrCode) {
+                const parsed = parseQRToken(cleanToken);
+                if (parsed) {
+                    // Find QR by matching teacher and expiration info
+                    qrCode = qrCodes.find(qr =>
+                        qr.teacherId === parsed.teacherId &&
+                        qr.expiresAt === parsed.expiresAt
+                    );
+                }
+            }
 
             if (!qrCode) {
-                return { success: false, message: MESSAGES.INVALID_QR };
+                return { success: false, message: 'QR Code not found in system. This code may have been generated on a different device or has been removed.' };
             }
 
             // Check if QR is active
@@ -210,7 +224,7 @@ export const AttendanceProvider: React.FC<{ children: ReactNode }> = ({ children
 
             // Update QR code scanned count
             const updatedQRCodes = qrCodes.map(qr =>
-                qr.id === qrCode.id ? { ...qr, scannedCount: qr.scannedCount + 1 } : qr
+                qr.id === qrCode!.id ? { ...qr, scannedCount: qr.scannedCount + 1 } : qr
             );
             setQrCodes(updatedQRCodes);
             await saveQRCodesToStorage(updatedQRCodes);

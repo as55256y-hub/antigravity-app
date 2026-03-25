@@ -1,261 +1,272 @@
-// Register Screen with Teacher ID Validation
+// Register Screen - Sophisticated Teal & Gold Luxury Theme
 
 import React, { useState } from 'react';
 import {
     View,
     Text,
-    TextInput,
-    TouchableOpacity,
     StyleSheet,
+    TouchableOpacity,
+    TextInput,
+    ScrollView,
     KeyboardAvoidingView,
     Platform,
-    ScrollView,
-    Alert,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../../context/AuthContext';
-import { COLORS, SPACING, FONT_SIZES, BORDER_RADIUS, MESSAGES } from '../../constants';
+import { COLORS, SPACING, FONT_SIZES, BORDER_RADIUS } from '../../constants';
 import { UserRole } from '../../types';
-
-const YEAR_OPTIONS = ['First Year', 'Second Year', 'Third Year', 'Fourth Year'];
-const CORRECT_TEACHER_ID = 'Teacher@123';
 
 const RegisterScreen = ({ navigation }: any) => {
     const { register } = useAuth();
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
-    const [phone, setPhone] = useState('');
-    const [department, setDepartment] = useState('');
-    const [institution, setInstitution] = useState('');
-    const [rollNumber, setRollNumber] = useState('');
-    const [role, setRole] = useState<UserRole>('student');
     const [password, setPassword] = useState('');
+    const [confirmPassword, setConfirmPassword] = useState('');
+    const [role, setRole] = useState<'teacher' | 'student'>('student');
     const [teacherId, setTeacherId] = useState('');
-    const [selectedYear, setSelectedYear] = useState('');
-    const [isLoading, setIsLoading] = useState(false);
+    const [rollNumber, setRollNumber] = useState('');
+    const [showPassword, setShowPassword] = useState(false);
+    const [loading, setLoading] = useState(false);
+
+    // Sophisticated Teal & Gold Luxury Color Palette
+    const colors = {
+        background: '#1A1A1A',
+        surface: '#2C2C2C',
+        primary: '#4F7C82',
+        accent: '#D4AF37',
+        copper: '#A05E3C',
+        text: '#FFF8DC',
+        textSecondary: '#C0C0C0',
+        textMuted: '#8A8A8A',
+    };
 
     const handleRegister = async () => {
-        if (!name.trim() || !email.trim() || !password.trim()) {
-            Alert.alert('Error', 'Please fill in all required fields');
+        if (!name || !email || !password) {
+            alert('Please fill in all required fields');
             return;
         }
 
-        // Teacher ID validation
-        if (role === 'teacher') {
-            if (!teacherId.trim()) {
-                Alert.alert('Error', 'Please enter Teacher ID');
-                return;
-            }
-            if (teacherId.trim() !== CORRECT_TEACHER_ID) {
-                Alert.alert('Error', 'Invalid Teacher ID. Please contact administration.');
-                return;
-            }
-            if (!selectedYear) {
-                Alert.alert('Error', 'Please select the year you teach');
-                return;
-            }
+        if (password !== confirmPassword) {
+            alert('Passwords do not match');
+            return;
         }
 
-        setIsLoading(true);
+        if (role === 'teacher' && teacherId !== 'Teacher@123') {
+            alert('Invalid Teacher ID. Please contact administrator.');
+            return;
+        }
+
+        setLoading(true);
         try {
-            const success = await register(
-                {
-                    name: name.trim(),
-                    email: email.trim(),
-                    phone: phone.trim(),
-                    department: department.trim(),
-                    institution: institution.trim(),
-                    rollNumber: rollNumber.trim(),
-                    role,
-                    teachingYear: role === 'teacher' ? selectedYear : undefined,
-                },
-                password
-            );
-            if (!success) {
-                Alert.alert('Error', MESSAGES.UNKNOWN_ERROR);
-            }
+            const userData = {
+                name,
+                email,
+                role,
+                rollNumber: role === 'student' ? rollNumber : undefined,
+            };
+            await register(userData, password);
         } catch (error) {
-            Alert.alert('Error', MESSAGES.NETWORK_ERROR);
+            alert('Registration failed. Please try again.');
         } finally {
-            setIsLoading(false);
+            setLoading(false);
         }
     };
 
     return (
         <KeyboardAvoidingView
-            style={styles.container}
+            style={[styles.container, { backgroundColor: colors.background }]}
             behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         >
-            <ScrollView contentContainerStyle={styles.scrollContent}>
-                <View style={styles.logoContainer}>
-                    <Text style={styles.logoText}>Suryodaya College</Text>
-                    <Text style={styles.tagline}>Create Your Account</Text>
+            <ScrollView
+                contentContainerStyle={styles.scrollContent}
+                showsVerticalScrollIndicator={false}
+            >
+                {/* Header */}
+                <TouchableOpacity
+                    style={styles.backButton}
+                    onPress={() => navigation.goBack()}
+                >
+                    <Ionicons name="arrow-back" size={24} color={colors.text} />
+                </TouchableOpacity>
+
+                <View style={styles.headerContainer}>
+                    <Text style={[styles.title, { color: colors.text }]}>Create Account</Text>
+                    <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
+                        Join Attendify today
+                    </Text>
                 </View>
 
-                <View style={styles.formContainer}>
-                    <View style={styles.roleSelector}>
-                        <TouchableOpacity
-                            style={[styles.roleButton, role === 'student' && styles.roleButtonActive]}
-                            onPress={() => setRole('student')}
-                        >
-                            <Text style={[styles.roleButtonText, role === 'student' && styles.roleButtonTextActive]}>
-                                Student
-                            </Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity
-                            style={[styles.roleButton, role === 'teacher' && styles.roleButtonActive]}
-                            onPress={() => setRole('teacher')}
-                        >
-                            <Text style={[styles.roleButtonText, role === 'teacher' && styles.roleButtonTextActive]}>
-                                Teacher
-                            </Text>
-                        </TouchableOpacity>
-                    </View>
-
-                    <View style={styles.inputContainer}>
-                        <Text style={styles.label}>Full Name *</Text>
-                        <TextInput
-                            style={styles.input}
-                            value={name}
-                            onChangeText={setName}
-                            placeholder="Enter your full name"
-                            placeholderTextColor={COLORS.textLight}
+                {/* Role Selection */}
+                <View style={styles.roleContainer}>
+                    <TouchableOpacity
+                        style={[
+                            styles.roleButton,
+                            {
+                                backgroundColor: role === 'student' ? colors.accent : colors.surface,
+                                borderColor: role === 'student' ? colors.accent : colors.textMuted,
+                            }
+                        ]}
+                        onPress={() => setRole('student')}
+                    >
+                        <Ionicons
+                            name="school"
+                            size={24}
+                            color={role === 'student' ? '#1A1A1A' : colors.textMuted}
                         />
-                    </View>
-
-                    <View style={styles.inputContainer}>
-                        <Text style={styles.label}>Email *</Text>
-                        <TextInput
-                            style={styles.input}
-                            value={email}
-                            onChangeText={setEmail}
-                            placeholder="Enter your email"
-                            placeholderTextColor={COLORS.textLight}
-                            keyboardType="email-address"
-                            autoCapitalize="none"
+                        <Text style={[
+                            styles.roleText,
+                            { color: role === 'student' ? '#1A1A1A' : colors.textMuted }
+                        ]}>
+                            Student
+                        </Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                        style={[
+                            styles.roleButton,
+                            {
+                                backgroundColor: role === 'teacher' ? colors.accent : colors.surface,
+                                borderColor: role === 'teacher' ? colors.accent : colors.textMuted,
+                            }
+                        ]}
+                        onPress={() => setRole('teacher')}
+                    >
+                        <Ionicons
+                            name="person"
+                            size={24}
+                            color={role === 'teacher' ? '#1A1A1A' : colors.textMuted}
                         />
-                    </View>
+                        <Text style={[
+                            styles.roleText,
+                            { color: role === 'teacher' ? '#1A1A1A' : colors.textMuted }
+                        ]}>
+                            Teacher
+                        </Text>
+                    </TouchableOpacity>
+                </View>
 
+                {/* Form */}
+                <View style={[styles.formCard, { backgroundColor: colors.surface }]}>
+                    {/* Name Input */}
                     <View style={styles.inputContainer}>
-                        <Text style={styles.label}>Phone</Text>
-                        <TextInput
-                            style={styles.input}
-                            value={phone}
-                            onChangeText={setPhone}
-                            placeholder="Enter your phone number"
-                            placeholderTextColor={COLORS.textLight}
-                            keyboardType="phone-pad"
-                        />
-                    </View>
-
-                    <View style={styles.inputContainer}>
-                        <Text style={styles.label}>Department</Text>
-                        <TextInput
-                            style={styles.input}
-                            value={department}
-                            onChangeText={setDepartment}
-                            placeholder="Enter department"
-                            placeholderTextColor={COLORS.textLight}
-                        />
-                    </View>
-
-                    <View style={styles.inputContainer}>
-                        <Text style={styles.label}>Institution</Text>
-                        <TextInput
-                            style={styles.input}
-                            value={institution}
-                            onChangeText={setInstitution}
-                            placeholder="Enter institution name"
-                            placeholderTextColor={COLORS.textLight}
-                        />
-                    </View>
-
-                    {role === 'student' && (
-                        <View style={styles.inputContainer}>
-                            <Text style={styles.label}>Roll Number</Text>
+                        <View style={[styles.inputWrapper, { backgroundColor: colors.background }]}>
+                            <Ionicons name="person-outline" size={20} color={colors.textMuted} style={styles.inputIcon} />
                             <TextInput
-                                style={styles.input}
-                                value={rollNumber}
-                                onChangeText={setRollNumber}
-                                placeholder="Enter roll number"
-                                placeholderTextColor={COLORS.textLight}
+                                style={[styles.input, { color: colors.text }]}
+                                placeholder="Full Name"
+                                placeholderTextColor={colors.textMuted}
+                                value={name}
+                                onChangeText={setName}
                             />
+                        </View>
+                    </View>
+
+                    {/* Email Input */}
+                    <View style={styles.inputContainer}>
+                        <View style={[styles.inputWrapper, { backgroundColor: colors.background }]}>
+                            <Ionicons name="mail-outline" size={20} color={colors.textMuted} style={styles.inputIcon} />
+                            <TextInput
+                                style={[styles.input, { color: colors.text }]}
+                                placeholder="Email"
+                                placeholderTextColor={colors.textMuted}
+                                value={email}
+                                onChangeText={setEmail}
+                                keyboardType="email-address"
+                                autoCapitalize="none"
+                            />
+                        </View>
+                    </View>
+
+                    {/* Role-specific Input */}
+                    {role === 'teacher' ? (
+                        <View style={styles.inputContainer}>
+                            <View style={[styles.inputWrapper, { backgroundColor: colors.background }]}>
+                                <Ionicons name="card-outline" size={20} color={colors.textMuted} style={styles.inputIcon} />
+                                <TextInput
+                                    style={[styles.input, { color: colors.text }]}
+                                    placeholder="Teacher ID (Teacher@123)"
+                                    placeholderTextColor={colors.textMuted}
+                                    value={teacherId}
+                                    onChangeText={setTeacherId}
+                                />
+                            </View>
+                        </View>
+                    ) : (
+                        <View style={styles.inputContainer}>
+                            <View style={[styles.inputWrapper, { backgroundColor: colors.background }]}>
+                                <Ionicons name="id-card-outline" size={20} color={colors.textMuted} style={styles.inputIcon} />
+                                <TextInput
+                                    style={[styles.input, { color: colors.text }]}
+                                    placeholder="Roll Number"
+                                    placeholderTextColor={colors.textMuted}
+                                    value={rollNumber}
+                                    onChangeText={setRollNumber}
+                                />
+                            </View>
                         </View>
                     )}
 
-                    {/* Teacher-specific fields */}
-                    {role === 'teacher' && (
-                        <>
-                            <View style={styles.inputContainer}>
-                                <Text style={styles.label}>Teacher ID *</Text>
-                                <TextInput
-                                    style={styles.input}
-                                    value={teacherId}
-                                    onChangeText={setTeacherId}
-                                    placeholder="Enter Teacher ID"
-                                    placeholderTextColor={COLORS.textLight}
-                                    secureTextEntry
-                                />
-                                <Text style={styles.hintText}>
-                                    Contact administration for Teacher ID
-                                </Text>
-                            </View>
-
-                            <View style={styles.inputContainer}>
-                                <Text style={styles.label}>Year You Teach *</Text>
-                                <View style={styles.yearSelector}>
-                                    {YEAR_OPTIONS.map((year) => (
-                                        <TouchableOpacity
-                                            key={year}
-                                            style={[
-                                                styles.yearButton,
-                                                selectedYear === year && styles.yearButtonActive
-                                            ]}
-                                            onPress={() => setSelectedYear(year)}
-                                        >
-                                            <Text style={[
-                                                styles.yearButtonText,
-                                                selectedYear === year && styles.yearButtonTextActive
-                                            ]}>
-                                                {year}
-                                            </Text>
-                                        </TouchableOpacity>
-                                    ))}
-                                </View>
-                            </View>
-                        </>
-                    )}
-
+                    {/* Password Input */}
                     <View style={styles.inputContainer}>
-                        <Text style={styles.label}>Password *</Text>
-                        <TextInput
-                            style={styles.input}
-                            value={password}
-                            onChangeText={setPassword}
-                            placeholder="Create a password"
-                            placeholderTextColor={COLORS.textLight}
-                            secureTextEntry
-                        />
+                        <View style={[styles.inputWrapper, { backgroundColor: colors.background }]}>
+                            <Ionicons name="lock-closed-outline" size={20} color={colors.textMuted} style={styles.inputIcon} />
+                            <TextInput
+                                style={[styles.input, { color: colors.text }]}
+                                placeholder="Password"
+                                placeholderTextColor={colors.textMuted}
+                                value={password}
+                                onChangeText={setPassword}
+                                secureTextEntry={!showPassword}
+                            />
+                            <TouchableOpacity
+                                onPress={() => setShowPassword(!showPassword)}
+                                style={styles.eyeButton}
+                            >
+                                <Ionicons
+                                    name={showPassword ? "eye-off-outline" : "eye-outline"}
+                                    size={20}
+                                    color={colors.textMuted}
+                                />
+                            </TouchableOpacity>
+                        </View>
                     </View>
 
+                    {/* Confirm Password Input */}
+                    <View style={styles.inputContainer}>
+                        <View style={[styles.inputWrapper, { backgroundColor: colors.background }]}>
+                            <Ionicons name="lock-closed-outline" size={20} color={colors.textMuted} style={styles.inputIcon} />
+                            <TextInput
+                                style={[styles.input, { color: colors.text }]}
+                                placeholder="Confirm Password"
+                                placeholderTextColor={colors.textMuted}
+                                value={confirmPassword}
+                                onChangeText={setConfirmPassword}
+                                secureTextEntry={!showPassword}
+                            />
+                        </View>
+                    </View>
+
+                    {/* Register Button */}
                     <TouchableOpacity
-                        style={[styles.button, isLoading && styles.buttonDisabled]}
+                        style={[styles.registerButton, { backgroundColor: colors.accent }]}
                         onPress={handleRegister}
-                        disabled={isLoading}
+                        disabled={loading}
                     >
-                        <Text style={styles.buttonText}>
-                            {isLoading ? 'Creating Account...' : 'Create Account'}
+                        <Text style={styles.registerButtonText}>
+                            {loading ? 'Creating Account...' : 'Create Account'}
                         </Text>
                     </TouchableOpacity>
 
-                    <TouchableOpacity
-                        style={styles.loginLink}
-                        onPress={() => navigation.goBack()}
-                    >
-                        <Text style={styles.loginLinkText}>
-                            Already have an account? Sign In
+                    {/* Login Link */}
+                    <View style={styles.loginContainer}>
+                        <Text style={[styles.loginText, { color: colors.textSecondary }]}>
+                            Already have an account?
                         </Text>
-                    </TouchableOpacity>
+                        <TouchableOpacity onPress={() => navigation.goBack()}>
+                            <Text style={[styles.loginLink, { color: colors.accent }]}>
+                                Sign In
+                            </Text>
+                        </TouchableOpacity>
+                    </View>
                 </View>
             </ScrollView>
         </KeyboardAvoidingView>
@@ -265,129 +276,93 @@ const RegisterScreen = ({ navigation }: any) => {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: COLORS.background,
     },
     scrollContent: {
         flexGrow: 1,
         padding: SPACING.lg,
     },
-    logoContainer: {
-        alignItems: 'center',
+    backButton: {
+        marginBottom: SPACING.md,
+    },
+    headerContainer: {
         marginBottom: SPACING.lg,
     },
-    logoText: {
-        fontSize: 24,
+    title: {
+        fontSize: FONT_SIZES.h1,
         fontWeight: 'bold',
-        color: COLORS.primary,
     },
-    tagline: {
+    subtitle: {
         fontSize: FONT_SIZES.body,
-        color: COLORS.textSecondary,
         marginTop: SPACING.xs,
     },
-    formContainer: {
-        backgroundColor: COLORS.surface,
-        borderRadius: BORDER_RADIUS.xl,
-        padding: SPACING.lg,
-        shadowColor: COLORS.black,
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 8,
-        elevation: 4,
-    },
-    roleSelector: {
+    roleContainer: {
         flexDirection: 'row',
+        gap: SPACING.md,
         marginBottom: SPACING.lg,
-        backgroundColor: COLORS.background,
-        borderRadius: BORDER_RADIUS.md,
-        padding: 4,
     },
     roleButton: {
         flex: 1,
-        padding: SPACING.sm,
+        flexDirection: 'row',
         alignItems: 'center',
-        borderRadius: BORDER_RADIUS.md,
+        justifyContent: 'center',
+        gap: SPACING.sm,
+        paddingVertical: SPACING.md,
+        borderRadius: BORDER_RADIUS.lg,
+        borderWidth: 1,
     },
-    roleButtonActive: {
-        backgroundColor: COLORS.primary,
-    },
-    roleButtonText: {
+    roleText: {
         fontSize: FONT_SIZES.body,
-        color: COLORS.textSecondary,
         fontWeight: '600',
     },
-    roleButtonTextActive: {
-        color: COLORS.white,
+    formCard: {
+        borderRadius: BORDER_RADIUS.xl,
+        padding: SPACING.xl,
+        borderWidth: 1,
+        borderColor: 'rgba(212, 175, 55, 0.2)',
     },
     inputContainer: {
         marginBottom: SPACING.md,
     },
-    label: {
-        fontSize: FONT_SIZES.bodySmall,
-        fontWeight: '600',
-        color: COLORS.text,
-        marginBottom: SPACING.xs,
+    inputWrapper: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        borderRadius: BORDER_RADIUS.lg,
+        paddingHorizontal: SPACING.md,
+    },
+    inputIcon: {
+        marginRight: SPACING.sm,
     },
     input: {
-        backgroundColor: COLORS.background,
-        borderRadius: BORDER_RADIUS.md,
-        padding: SPACING.md,
+        flex: 1,
+        paddingVertical: SPACING.md,
         fontSize: FONT_SIZES.body,
-        color: COLORS.text,
-        borderWidth: 1,
-        borderColor: COLORS.border,
     },
-    hintText: {
-        fontSize: FONT_SIZES.caption,
-        color: COLORS.textSecondary,
-        marginTop: SPACING.xs,
+    eyeButton: {
+        padding: SPACING.xs,
     },
-    yearSelector: {
-        flexDirection: 'row',
-        flexWrap: 'wrap',
-        gap: SPACING.sm,
-    },
-    yearButton: {
-        backgroundColor: COLORS.background,
-        borderRadius: BORDER_RADIUS.md,
-        paddingVertical: SPACING.sm,
-        paddingHorizontal: SPACING.md,
-        borderWidth: 1,
-        borderColor: COLORS.border,
-    },
-    yearButtonActive: {
-        backgroundColor: COLORS.primary,
-        borderColor: COLORS.primary,
-    },
-    yearButtonText: {
-        fontSize: FONT_SIZES.bodySmall,
-        color: COLORS.text,
-    },
-    yearButtonTextActive: {
-        color: COLORS.white,
-    },
-    button: {
-        backgroundColor: COLORS.primary,
-        borderRadius: BORDER_RADIUS.md,
-        padding: SPACING.md,
+    registerButton: {
+        borderRadius: BORDER_RADIUS.lg,
+        paddingVertical: SPACING.md,
         alignItems: 'center',
         marginTop: SPACING.md,
     },
-    buttonDisabled: {
-        backgroundColor: COLORS.primaryLight,
-    },
-    buttonText: {
-        color: COLORS.white,
+    registerButtonText: {
+        color: '#1A1A1A',
         fontSize: FONT_SIZES.body,
-        fontWeight: '600',
+        fontWeight: 'bold',
+    },
+    loginContainer: {
+        flexDirection: 'row',
+        justifyContent: 'center',
+        gap: SPACING.xs,
+        marginTop: SPACING.lg,
+    },
+    loginText: {
+        fontSize: FONT_SIZES.body,
     },
     loginLink: {
-        marginTop: SPACING.lg,
-        alignItems: 'center',
-    },
-    loginLinkText: {
-        color: COLORS.primary,
         fontSize: FONT_SIZES.body,
+        fontWeight: '600',
     },
 });
 
